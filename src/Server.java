@@ -1,4 +1,5 @@
-import java.io.IOException;
+// create a Server.java file and paste the code
+import java.io.IOException; // libraries 
 import java.net.ServerSocket;
 import java.net.Socket;
 
@@ -11,13 +12,13 @@ public class Server {
         this.serverSocket = serverSocket;
     }
 
-    public void startServer(){
+    public void serverStart(){
 
         try{
             // check and loop the serverSocket
             while(!serverSocket.isClosed()){
                 Socket socket = serverSocket.accept();
-                System.out.println("A new Client has connected");
+                System.out.println("New Friend Connected");
                 // implemented an object which handle runnable class
                 ClientHandler clientHandler = new ClientHandler(socket);
 
@@ -43,6 +44,6 @@ public class Server {
     public static void main(String[] args) throws Exception {
         ServerSocket serverSocket = new ServerSocket(1234);
         Server server = new Server(serverSocket);
-        server.startServer();
+        server.serverStart();
     }
 }

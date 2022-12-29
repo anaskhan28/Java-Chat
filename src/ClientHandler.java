@@ -1,3 +1,4 @@
+// create a ClientHandler.java file and paste the code
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -10,24 +11,25 @@ public class ClientHandler  implements Runnable{
  
     public static ArrayList<ClientHandler>clientHandlers = new ArrayList<>();
     public Socket socket;
-    private BufferedReader bufferedReader;
-    private BufferedWriter bufferedWriter;
-    private String clientUsername;
+    private BufferedReader buffReader;
+    private BufferedWriter buffWriter;
+    private String name;
     
     public ClientHandler(Socket socket){
+          // Constructors of all the private classes
         try{
         this.socket = socket;
-        this.bufferedWriter = new BufferedWriter( new OutputStreamWriter(socket.getOutputStream()));
-        this.bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-        this.clientUsername = bufferedReader.readLine();
+        this.buffWriter = new BufferedWriter( new OutputStreamWriter(socket.getOutputStream()));
+        this.buffReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+        this.name = buffReader.readLine();
         clientHandlers.add(this);
-        boradcastMessage("SERVER" + clientUsername + "has entered the chat");
+        boradcastMessage("SERVER" + name + " has entered in the room");
 
     } catch(IOException e){
-    closeEverything(socket, bufferedReader, bufferedWriter);
+    closeAll(socket, buffReader, buffWriter);
     }
 }
-
+// run method override
     @Override
     public void run() {
 
@@ -35,10 +37,10 @@ public class ClientHandler  implements Runnable{
 
         while(socket.isConnected()){
             try{
-                messageFromClient = bufferedReader.readLine();
+                messageFromClient = buffReader.readLine();
                 boradcastMessage(messageFromClient);
             } catch(IOException e){
-                closeEverything(socket, bufferedReader,  bufferedWriter);
+                closeAll(socket, buffReader,  buffWriter);
                 break;
             }
         }
@@ -46,32 +48,33 @@ public class ClientHandler  implements Runnable{
     public void boradcastMessage(String messageToSend){
         for(ClientHandler clientHandler: clientHandlers){
             try{
-                if(!clientHandler.clientUsername.equals(clientUsername)){
-                    clientHandler.bufferedWriter.write(messageToSend);
-                    clientHandler.bufferedWriter.newLine();
-                    clientHandler.bufferedWriter.flush();
+                if(!clientHandler.name.equals(name)){
+                    clientHandler.buffWriter.write(messageToSend);
+                    clientHandler.buffWriter.newLine();
+                    clientHandler.buffWriter.flush();
                 }
             } catch(IOException e){
-                closeEverything(socket,bufferedReader, bufferedWriter);
+                closeAll(socket,buffReader, buffWriter);
 
             }
         }
     }
-
+    // notify if the user left the chat
     public void removeClientHandler(){
         clientHandlers.remove(this);
-        boradcastMessage("SERVER " + clientUsername + " has left the chat");
+        boradcastMessage("server " + name + " has gone");
     }
 
-    public void closeEverything(Socket socket, BufferedReader bufferedReader, BufferedWriter bufferedWriter){
-
+    public void closeAll(Socket socket, BufferedReader buffReader, BufferedWriter buffWriter){
+      
+        // handle the removeClient funciton
         removeClientHandler();
         try{
-            if(bufferedReader!= null){
-                bufferedReader.close();
+            if(buffReader!= null){
+                buffReader.close();
             }
-            if(bufferedWriter != null){
-                bufferedWriter.close();
+            if(buffWriter != null){
+                buffWriter.close();
             }
             if(socket != null){
                 socket.close();
